@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1b2d">
+<title>Ledger – Expense Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0f1b2d; --panel:#16263d; --panel2:#1c3050; --line:#2c4263;
+  --text:#f2eee4; --muted:#9fb0c8; --brass:#c9a45c; --brass2:#e2c88f; --danger:#e08a7a;
+  --serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+  --sans:'Manrope',-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html{background:var(--ink);color:var(--text);font-family:var(--sans);-webkit-text-size-adjust:100%}
+body{min-height:100vh;padding:env(safe-area-inset-top) 18px calc(env(safe-area-inset-bottom) + 40px);
+  background:radial-gradient(900px 400px at 50% -120px,#1b3358 0%,transparent 70%),var(--ink)}
+main{max-width:680px;margin:0 auto}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
+header{display:flex;align-items:center;justify-content:space-between;padding:22px 0 8px}
+header h1{font:600 26px/1 var(--serif);letter-spacing:.02em;color:var(--brass2)}
+.nav{display:flex;align-items:center;gap:6px}
+.nav button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);font-size:18px;color:var(--muted)}
+.nav button:disabled{opacity:.3;cursor:default}
+.nav span{min-width:128px;text-align:center;font-weight:500;font-size:15px}
+
+.hero{margin:18px 0 22px;padding:28px 24px 24px;border:1px solid var(--brass);border-radius:6px 22px 6px 22px;
+  background:linear-gradient(160deg,var(--panel2),var(--panel))}
+.hero .lbl{color:var(--muted);font-size:14px}
+.hero .total{font:700 clamp(44px,13vw,68px)/1.05 var(--serif);margin:6px 0 14px;font-variant-numeric:lining-nums;color:var(--text)}
+.hero .meta{display:flex;gap:28px;color:var(--muted);font-size:14px}
+.hero .meta b{display:block;color:var(--text);font-weight:600;font-size:16px;margin-top:2px}
+
+section{margin-bottom:26px}
+h2{font:600 22px/1 var(--serif);margin-bottom:12px;color:var(--brass2)}
+.panel{border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+
+.cat{padding:13px 16px;border-bottom:1px solid var(--line)}
+.cat:last-child{border:0}
+.cat .row{display:flex;justify-content:space-between;font-size:15px;margin-bottom:8px}
+.cat .row span:last-child{font-weight:600}
+.cat .row small{color:var(--muted);margin-left:8px;font-weight:400}
+.bar{height:6px;border-radius:3px;background:var(--ink);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--brass),var(--brass2));border-radius:3px;transition:width .5s ease}
+
+.day{padding:10px 16px 4px;color:var(--muted);font-size:13px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.day:first-child{border-radius:12px 12px 0 0}
+.item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.item:last-child{border:0}
+.item .what{flex:1;min-width:0}
+.item .what b{font-weight:600;font-size:15px}
+.item .what p{color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .amt{font-weight:600;font-variant-numeric:tabular-nums}
+.item .del{color:var(--muted);font-size:20px;line-height:1;padding:4px 6px;border-radius:6px}
+.item .del:hover{color:var(--danger)}
+.empty{padding:28px 20px;text-align:center;color:var(--muted);font-size:15px;line-height:1.5}
+
+details{border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+summary{padding:14px 16px;cursor:pointer;font-weight:600;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'+';float:right;color:var(--brass)}
+details[open] summary::after{content:'–'}
+form{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}
+form label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}
+form .wide{grid-column:1/-1}
+input,select{background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:11px 12px;font-size:16px;color:var(--text);width:100%}
+.btn{background:var(--brass);color:var(--ink);font-weight:600;border-radius:8px;padding:12px 16px}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.tools button,.tools label{border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--muted);cursor:pointer}
+.tools button:hover,.tools label:hover{border-color:var(--brass);color:var(--text)}
+.note{margin-top:16px;color:var(--muted);font-size:12px;line-height:1.5}
+
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 22px);transform:translate(-50%,30px);opacity:0;
+  background:var(--brass);color:var(--ink);padding:12px 18px;border-radius:999px;font-weight:600;font-size:14px;
+  pointer-events:none;transition:.3s;max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Ledger</h1>
+    <div class="nav">
+      <button id="prev" aria-label="Previous month">‹</button>
+      <span id="month"></span>
+      <button id="next" aria-label="Next month">›</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="lbl">Spent this month</div>
+    <div class="total" id="total">0</div>
+    <div class="meta">
+      <div>Entries<b id="count">0</b></div>
+      <div>Daily average<b id="avg">0</b></div>
+      <div>Top category<b id="top">–</b></div>
+    </div>
+  </div>
+
+  <section>
+    <h2>By category</h2>
+    <div class="panel" id="cats"></div>
+  </section>
+
+  <section>
+    <h2>Transactions</h2>
+    <div class="panel" id="list"></div>
+  </section>
+
+  <section>
+    <details>
+      <summary>Add an expense by hand</summary>
+      <form id="form">
+        <label>Amount<input id="f-amt" type="number" inputmode="decimal" step="0.01" min="0.01" required></label>
+        <label>Date<input id="f-date" type="date" required></label>
+        <label class="wide">Category<select id="f-cat"></select></label>
+        <label class="wide">Note<input id="f-note" type="text" maxlength="120" placeholder="Optional"></label>
+        <button class="btn wide" type="submit">Save expense</button>
+      </form>
+    </details>
+    <div class="tools">
+      <button id="csv">Export CSV</button>
+      <button id="bak">Back up data</button>
+      <label>Restore backup<input id="rst" type="file" accept=".json,application/json" hidden></label>
+    </div>
+    <p class="note">Data is stored in this browser on this device. Open the dashboard in Safari (not a Home Screen copy) so the Shortcut and the dashboard share the same storage. Back up now and then.</p>
+  </section>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const CURRENCY='INR', LOCALE='en-IN';          // change these two to switch currency
+const CATS=['Food','Groceries','Transport','Bills','Shopping','Other'];
+const KEY='ledger.v1';
+const $=s=>document.querySelector(s);
+const money=n=>new Intl.NumberFormat(LOCALE,{style:'currency',currency:CURRENCY,minimumFractionDigits:0,maximumFractionDigits:2}).format(n);
+const pad=n=>String(n).padStart(2,'0');
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
+const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+let db=load();
+let view=new Date(); view.setDate(1);
+
+function load(){try{const v=JSON.parse(localStorage.getItem(KEY));return Array.isArray(v)?v:[]}catch{return[]}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch{toast('Could not save. Allow website data in Safari settings.')}}
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)}
+
+function add(e){
+  db.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),amount:Math.round(e.amount*100)/100,cat:e.cat,note:e.note||'',date:e.date});
+  save();
+}
+
+/* Shortcut hand-off: ?amount=250&cat=Food&note=Lunch&date=2026-10-06 */
+function ingest(){
+  const p=new URLSearchParams(location.search);
+  if(!p.has('amount'))return;
+  const amt=parseFloat(String(p.get('amount')).replace(',','.'));
+  if(amt>0){
+    const c=p.get('cat'), d=p.get('date');
+    const e={amount:amt,cat:CATS.includes(c)?c:'Other',note:(p.get('note')||'').trim().slice(0,120),date:/^\d{4}-\d{2}-\d{2}$/.test(d||'')?d:today()};
+    add(e); toast(`Saved ${money(e.amount)} · ${e.cat}`);
+  }else toast('Amount missing, nothing saved');
+  history.replaceState(null,'',location.pathname);   // reload won't add it twice
+}
+
+function render(){
+  const key=`${view.getFullYear()}-${pad(view.getMonth()+1)}`;
+  const now=new Date(), isNow=now.getFullYear()===view.getFullYear()&&now.getMonth()===view.getMonth();
+  $('#month').textContent=view.toLocaleDateString(LOCALE,{month:'long',year:'numeric'});
+  $('#next').disabled=isNow;
+
+  const rows=db.filter(e=>e.date.startsWith(key)).sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+  const total=rows.reduce((s,e)=>s+e.amount,0);
+  const days=isNow?now.getDate():new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
+  const by={};rows.forEach(e=>by[e.cat]=(by[e.cat]||0)+e.amount);
+  const sorted=Object.entries(by).sort((a,b)=>b[1]-a[1]);
+
+  $('#total').textContent=money(total);
+  $('#count').textContent=rows.length;
+  $('#avg').textContent=money(total/days);
+  $('#top').textContent=sorted[0]?sorted[0][0]:'–';
+
+  $('#cats').innerHTML=sorted.length?sorted.map(([c,v])=>{
+    const pc=Math.round(v/total*100);
+    return `<div class="cat"><div class="row"><span>${esc(c)}<small>${pc}%</small></span><span>${money(v)}</span></div><div class="bar"><i style="width:${pc}%"></i></div></div>`;
+  }).join(''):`<div class="empty">No spending recorded for this month.</div>`;
+
+  let last='',html='';
+  rows.forEach(e=>{
+    if(e.date!==last){last=e.date;
+      const d=new Date(e.date+'T00:00:00');
+      html+=`<div class="day">${d.toLocaleDateString(LOCALE,{weekday:'long',day:'numeric',month:'long'})}</div>`}
+    html+=`<div class="item"><div class="what"><b>${esc(e.cat)}</b>${e.note?`<p>${esc(e.note)}</p>`:''}</div><span class="amt">${money(e.amount)}</span><button class="del" data-id="${e.id}" aria-label="Delete expense">×</button></div>`;
+  });
+  $('#list').innerHTML=html||`<div class="empty">Nothing here yet.<br>Double-tap the back of your iPhone to log an expense.</div>`;
+}
+
+/* events */
+$('#prev').onclick=()=>{view.setMonth(view.getMonth()-1);render()};
+$('#next').onclick=()=>{view.setMonth(view.getMonth()+1);render()};
+$('#list').onclick=e=>{
+  const b=e.target.closest('.del'); if(!b||!confirm('Delete this expense?'))return;
+  db=db.filter(x=>x.id!==b.dataset.id); save(); render(); toast('Deleted');
+};
+$('#f-cat').innerHTML=CATS.map(c=>`<option>${c}</option>`).join('');
+$('#f-date').value=today();
+$('#form').onsubmit=e=>{
+  e.preventDefault();
+  add({amount:parseFloat($('#f-amt').value),cat:$('#f-cat').value,note:$('#f-note').value.trim(),date:$('#f-date').value});
+  e.target.reset(); $('#f-date').value=today(); render(); toast('Saved');
+};
+
+function download(name,type,text){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();
+}
+$('#csv').onclick=()=>{
+  const q=s=>`"${String(s).replace(/"/g,'""')}"`;
+  const lines=['Date,Category,Amount,Note',...db.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(e=>[e.date,e.cat,e.amount,q(e.note)].join(','))];
+  download('expenses.csv','text/csv',lines.join('\n'));
+};
+$('#bak').onclick=()=>download(`ledger-backup-${today()}.json`,'application/json',JSON.stringify(db));
+$('#rst').onchange=async e=>{
+  try{
+    const data=JSON.parse(await e.target.files[0].text());
+    if(!Array.isArray(data))throw 0;
+    const ids=new Set(db.map(x=>x.id));
+    const fresh=data.filter(x=>x&&x.id&&x.amount>0&&x.date&&!ids.has(x.id));
+    db=db.concat(fresh); save(); render(); toast(`Restored ${fresh.length} entries`);
+  }catch{toast('That file is not a valid backup')}
+  e.target.value='';
+};
+
+ingest();
+render();
+</script>
+</body>
+</html>
